@@ -4,6 +4,7 @@
 import csv
 import snap
 import networkx as nx
+from graph_preprocessing import *
 
 
 def read_csv (path):
@@ -57,12 +58,12 @@ def build_graph_snap (nodes_file, edges_file):
 
 def build_graph_networkx (nodes_file, edges_file):
     """Build NetworkX based directed graph"""
-    graph = nx.Graph()
+    graph = nx.DiGraph()
     nodes_data = read_nodes (nodes_file)
     edges_data = read_edges (edges_file)
     graph.add_nodes_from(nodes_data.values())
     for edge in edges_data:
-        graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]])
+        graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]], {'weight': edge[2]})
 
     inv_nodes = {v: k for k, v in nodes_data.items()}
     return graph, inv_nodes
@@ -75,6 +76,9 @@ def build_graph_networkx (nodes_file, edges_file):
 def main ():
     G, nodes_dict = build_graph_networkx('../data/nodes.csv', '../data/edges.csv')
     print nx.info(G)
+    remove_self_loops(G)
+    print nx.info(G)
+
 
 if __name__ == '__main__':
     main()
