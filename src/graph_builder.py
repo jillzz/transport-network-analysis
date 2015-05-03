@@ -4,7 +4,6 @@
 import csv
 import snap
 import networkx as nx
-from graph_preprocessing import *
 
 
 def read_csv (path):
@@ -67,18 +66,3 @@ def build_graph_networkx (nodes_file, edges_file):
 
     inv_nodes = {v: k for k, v in nodes_data.items()}
     return graph, inv_nodes
-
-
-
-###############################################################################
-#---------------------------TEST------------------------------------------------
-
-def main ():
-    G, nodes_dict = build_graph_networkx('../data/nodes.csv', '../data/edges.csv')
-    print nx.info(G)
-    remove_self_loops(G)
-    print nx.info(G)
-
-
-if __name__ == '__main__':
-    main()
