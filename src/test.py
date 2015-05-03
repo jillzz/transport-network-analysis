@@ -12,8 +12,10 @@ def main ():
     remove_self_loops(G)
     #draw_graph(G)
 
-    print nx.info(G)
-    output_conectivity_info(G, '../gen_data/conectivity.txt')
+    #print nx.info(G)
+    #output_conectivity_info(G, '../gen_data/conectivity.txt')
+    output_indegree_centrality_info (G, '../gen_data/indegree_centrality1.txt', nodes_dict)
+    output_outdegree_centrality_info (G, '../gen_data/outdegree_centrality1.txt', nodes_dict)
 
 
 if __name__ == '__main__':
