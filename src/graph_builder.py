@@ -55,14 +55,17 @@ def build_graph_snap (nodes_file, edges_file):
     return graph, inv_nodes
 
 
-def build_graph_networkx (nodes_file, edges_file):
+def build_graph_networkx (nodes_file, edges_file, graph_name = 'Graph', weighted = True):
     """Build NetworkX based directed graph"""
-    graph = nx.DiGraph()
+    graph = nx.DiGraph(name = graph_name)
     nodes_data = read_nodes (nodes_file)
     edges_data = read_edges (edges_file)
     graph.add_nodes_from(nodes_data.values())
     for edge in edges_data:
-        graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]], {'weight': edge[2]})
+        if weighted:
+            graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]], {'weight': edge[2]})
+        else:
+            graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]])
 
     inv_nodes = {v: k for k, v in nodes_data.items()}
     return graph, inv_nodes
