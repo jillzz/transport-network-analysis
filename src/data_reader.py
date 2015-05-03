@@ -3,6 +3,7 @@
 
 import csv
 import snap
+import networkx as nx
 
 
 def read_csv (path):
@@ -37,8 +38,7 @@ def read_edges (path):
     return edges_list
 
 
-
-def build_graph (nodes_file, edges_file):
+def build_graph_snap (nodes_file, edges_file):
     """ Builds the graph as snap.TNGraph (weighted, directed graph)
     """
     nodes_data = read_nodes (nodes_file)
@@ -51,14 +51,30 @@ def build_graph (nodes_file, edges_file):
     for edge in edges_data:
         graph.AddEdge (nodes_data[edge[0]], nodes_data[edge[1]])
 
-    snap.DrawGViz (graph, snap.gvlDot, "graph.png", "graph 1")
+    inv_nodes = {v: k for k, v in nodes_data.items()}
+    return graph, inv_nodes
+
+
+def build_graph_networkx (nodes_file, edges_file):
+    """Build NetworkX based directed graph"""
+    graph = nx.Graph()
+    nodes_data = read_nodes (nodes_file)
+    edges_data = read_edges (edges_file)
+    graph.add_nodes_from(nodes_data.values())
+    for edge in edges_data:
+        graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]])
+
+    inv_nodes = {v: k for k, v in nodes_data.items()}
+    return graph, inv_nodes
+
+
 
 ###############################################################################
 #---------------------------TEST------------------------------------------------
 
 def main ():
-    build_graph('../data/nodes.csv', '../data/edges.csv')
-
+    G, nodes_dict = build_graph_networkx('../data/nodes.csv', '../data/edges.csv')
+    print nx.info(G)
 
 if __name__ == '__main__':
     main()
