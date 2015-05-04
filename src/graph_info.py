@@ -11,6 +11,16 @@ def dict_to_sorted_list (dictionary):
     return dict_list
 
 
+def output_basic_info (graph, path):
+    """Output basic information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+    """
+    with open(path, 'w') as out:
+        out.write('***Basic***\n')
+        out.write(nx.info(graph))
+
+
 def output_conectivity_info (graph, path):
     """Output strong connectivity information about the graph.
        graph : (networkx.Graph)
@@ -18,6 +28,8 @@ def output_conectivity_info (graph, path):
     """
     with open(path, 'w') as out:
         out.write('***Conectivity***\n')
+        out.write('Is weakly connected: %s\n' % nx.is_weakly_connected(graph))
+        out.write('Number of weakly connected components: %d\n' % nx.number_weakly_connected_components(graph))
         out.write('Is strongly connected: %s\n' % nx.is_strongly_connected(graph))
         out.write('Number of strongly connected components: %d' % nx.number_strongly_connected_components(graph))
 
@@ -55,3 +67,36 @@ def output_outdegree_centrality_info (graph, path, nodes_dict):
         for element in outdeg_list:
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
+
+def output_closeness_centrality_info (graph, path, nodes_dict):
+    """Output Closeness centrality information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+    closeness_dict = nx.closeness_centrality(graph, distance='weight')
+    closeness_dict = dict((nodes_dict[key], closeness_dict[key]) for key in nodes_dict)
+    closeness_list = dict_to_sorted_list(closeness_dict)
+
+    with open(path, 'w') as out:
+        out.write('***Closeness Centrality***\n')
+        out.write('Node\tLayer\tCloseness centrality\n')
+        for element in closeness_list:
+            out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
+
+
+def output_betweeness_centrality_info (graph, path, nodes_dict):
+    """Output Betweeness centrality information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+    betweeness_dict = nx.betweenness_centrality(graph, weight='weight', endpoints=True)
+    betweeness_dict = dict((nodes_dict[key], betweeness_dict[key]) for key in nodes_dict)
+    betweeness_list = dict_to_sorted_list(betweeness_dict)
+
+    with open(path, 'w') as out:
+        out.write('***Betweeness Centrality***\n')
+        out.write('Node\tLayer\tBetweeness centrality\n')
+        for element in betweeness_list:
+            out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
