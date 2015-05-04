@@ -13,7 +13,8 @@ def main ():
     #draw_graph(G)
 
     #output_basic_info (G, '../gen_data/basic_graph_info.txt')
-    output_conectivity_info(G, '../gen_data/conectivity.txt')
+    #output_conectivity_info(G, '../gen_data/conectivity.txt')
+    output_aperiodicity_info(G, '../gen_data/aperiodicity.txt')
     #output_indegree_centrality_info (G, '../gen_data/indegree_centrality.txt', nodes_dict)
     #output_outdegree_centrality_info (G, '../gen_data/outdegree_centrality.txt', nodes_dict)
     #output_closeness_centrality_info (G, '../gen_data/closeness_centrality.txt', nodes_dict)

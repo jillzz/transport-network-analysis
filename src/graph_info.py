@@ -22,7 +22,7 @@ def output_basic_info (graph, path):
 
 
 def output_conectivity_info (graph, path):
-    """Output strong connectivity information about the graph.
+    """Output connectivity information about the graph.
        graph : (networkx.Graph)
        path: (String) contains the path to the output file
     """
@@ -32,6 +32,16 @@ def output_conectivity_info (graph, path):
         out.write('Number of weakly connected components: %d\n' % nx.number_weakly_connected_components(graph))
         out.write('Is strongly connected: %s\n' % nx.is_strongly_connected(graph))
         out.write('Number of strongly connected components: %d' % nx.number_strongly_connected_components(graph))
+
+
+def output_aperiodicity_info (graph, path):
+    """Output aperiodicity information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+    """
+    with open(path, 'w') as out:
+        out.write('***Aperiodicity***\n')
+        out.write('Is aperiodic: %s' % nx.is_aperiodic(graph))
 
 
 def output_indegree_centrality_info (graph, path, nodes_dict):
