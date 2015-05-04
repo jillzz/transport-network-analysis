@@ -110,3 +110,20 @@ def output_betweeness_centrality_info (graph, path, nodes_dict):
         out.write('Node\tLayer\tBetweeness centrality\n')
         for element in betweeness_list:
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
+
+
+def output_eigenvector_centrality_info (graph, path, nodes_dict):
+    """Output Eigenvector centrality information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+    eigen_dict = nx.eigenvector_centrality_numpy(graph, weight='weight')
+    eigen_dict = dict((nodes_dict[key], eigen_dict[key]) for key in nodes_dict)
+    eigen_list = dict_to_sorted_list(eigen_dict)
+
+    with open(path, 'w') as out:
+        out.write('***Eigenvector Centrality***\n')
+        out.write('Node\tLayer\tEigenvector centrality\n')
+        for element in eigen_list:
+            out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
