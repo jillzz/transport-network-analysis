@@ -127,3 +127,40 @@ def output_eigenvector_centrality_info (graph, path, nodes_dict):
         out.write('Node\tLayer\tEigenvector centrality\n')
         for element in eigen_list:
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
+
+
+def output_pagerank_info (graph, path, nodes_dict):
+    """Output Pagerank information about the graph (no damping factor).
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+    pagerank_dict = nx.pagerank(graph, alpha = 1, max_iter=150, weight='weight')
+    pagerank_dict = dict((nodes_dict[key], pagerank_dict[key]) for key in nodes_dict)
+    pagerank_list = dict_to_sorted_list(pagerank_dict)
+
+    with open(path, 'w') as out:
+        out.write('***Pagerank***\n')
+        out.write('Node\tLayer\tPagerank\n')
+        for element in pagerank_list:
+            out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
+
+
+# for debugging
+def output_clustering_info (graph, path, nodes_dict):
+    """Output Clustering coefficients information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+    cluster_dict = nx.clustering(graph, weight='weight')
+    cluster_dict = dict((nodes_dict[key], cluster_dict[key]) for key in nodes_dict)
+    cluster_list = dict_to_sorted_list(cluster_dict)
+
+    with open(path, 'w') as out:
+        out.write('***Clustering***\n')
+        out.write('Average clustering coefficient: %f\n' % nx.average_clustering(graph, weight='weight'))
+        out.write('Node\tLayer\tClustering coefficient\n')
+        for element in cluster_list:
+            out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
+

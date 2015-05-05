@@ -19,7 +19,9 @@ def main ():
     #output_outdegree_centrality_info (G, '../gen_data/outdegree_centrality.txt', nodes_dict)
     #output_closeness_centrality_info (G, '../gen_data/closeness_centrality.txt', nodes_dict)
     #output_betweeness_centrality_info (G, '../gen_data/betweeness_centrality.txt', nodes_dict)
-    output_eigenvector_centrality_info (G, '../gen_data/eigenvector_centrality.txt', nodes_dict)
+    #output_eigenvector_centrality_info (G, '../gen_data/eigenvector_centrality.txt', nodes_dict)
+    output_pagerank_info (G, '../gen_data/pagerank.txt', nodes_dict)
+
 
 
 if __name__ == '__main__':
