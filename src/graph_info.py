@@ -51,7 +51,7 @@ def output_indegree_centrality_info (graph, path, nodes_dict):
        nodes_dict: (dictionary) maps node id to node name
     """
     indeg_dict = nx.in_degree_centrality(graph)
-    indeg_dict = dict((nodes_dict[key], indeg_dict[key]) for key in nodes_dict)
+    indeg_dict = dict((nodes_dict[key], indeg_dict[key]) for key in nodes_dict if key in indeg_dict)
     indeg_list = dict_to_sorted_list(indeg_dict)
 
     with open(path, 'w') as out:
@@ -68,7 +68,7 @@ def output_outdegree_centrality_info (graph, path, nodes_dict):
        nodes_dict: (dictionary) maps node id to node name
     """
     outdeg_dict = nx.out_degree_centrality(graph)
-    outdeg_dict = dict((nodes_dict[key], outdeg_dict[key]) for key in nodes_dict)
+    outdeg_dict = dict((nodes_dict[key], outdeg_dict[key]) for key in nodes_dict if key in outdeg_dict)
     outdeg_list = dict_to_sorted_list(outdeg_dict)
 
     with open(path, 'w') as out:
@@ -85,7 +85,7 @@ def output_closeness_centrality_info (graph, path, nodes_dict):
        nodes_dict: (dictionary) maps node id to node name
     """
     closeness_dict = nx.closeness_centrality(graph, distance='weight')
-    closeness_dict = dict((nodes_dict[key], closeness_dict[key]) for key in nodes_dict)
+    closeness_dict = dict((nodes_dict[key], closeness_dict[key]) for key in nodes_dict if key in closeness_dict)
     closeness_list = dict_to_sorted_list(closeness_dict)
 
     with open(path, 'w') as out:
@@ -95,14 +95,14 @@ def output_closeness_centrality_info (graph, path, nodes_dict):
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
 
-def output_betweeness_centrality_info (graph, path, nodes_dict):
+def output_betweeness_centrality_info (graph, path, nodes_dict, k = None):
     """Output Betweeness centrality information about the graph.
        graph : (networkx.Graph)
        path: (String) contains the path to the output file
        nodes_dict: (dictionary) maps node id to node name
     """
-    betweeness_dict = nx.betweenness_centrality(graph, weight='weight', endpoints=True)
-    betweeness_dict = dict((nodes_dict[key], betweeness_dict[key]) for key in nodes_dict)
+    betweeness_dict = nx.betweenness_centrality(graph, k, weight = 'weight', endpoints=True)
+    betweeness_dict = dict((nodes_dict[key], betweeness_dict[key]) for key in nodes_dict if key in betweeness_dict)
     betweeness_list = dict_to_sorted_list(betweeness_dict)
 
     with open(path, 'w') as out:
@@ -112,6 +112,24 @@ def output_betweeness_centrality_info (graph, path, nodes_dict):
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
 
+def output_edge_betweeness_centrality_info (graph, path, nodes_dict):
+    """Output Edge betweeness centrality information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+    betweeness_dict = nx.edge_betweenness_centrality(graph, weight = 'weight')
+    betweeness_dict = dict(((nodes_dict[key[0]], nodes_dict[key[1]]), betweeness_dict[key]) for key in betweeness_dict)
+    betweeness_list = dict_to_sorted_list(betweeness_dict)
+
+
+    with open(path, 'w') as out:
+        out.write('***Edge Betweeness Centrality***\n')
+        out.write('Node\tLayer\tEdge Betweeness centrality\n')
+        for element in betweeness_list:
+            out.write(str(element[0][0]) + '\t' + str(element[0][1]) + '\t' + str(element[1]) + '\n')
+
+
 def output_eigenvector_centrality_info (graph, path, nodes_dict):
     """Output Eigenvector centrality information about the graph.
        graph : (networkx.Graph)
@@ -119,7 +137,7 @@ def output_eigenvector_centrality_info (graph, path, nodes_dict):
        nodes_dict: (dictionary) maps node id to node name
     """
     eigen_dict = nx.eigenvector_centrality_numpy(graph, weight='weight')
-    eigen_dict = dict((nodes_dict[key], eigen_dict[key]) for key in nodes_dict)
+    eigen_dict = dict((nodes_dict[key], eigen_dict[key]) for key in nodes_dict if key in eigen_dict)
     eigen_list = dict_to_sorted_list(eigen_dict)
 
     with open(path, 'w') as out:
@@ -136,7 +154,7 @@ def output_pagerank_info (graph, path, nodes_dict):
        nodes_dict: (dictionary) maps node id to node name
     """
     pagerank_dict = nx.pagerank(graph, alpha = 1, max_iter=150, weight='weight')
-    pagerank_dict = dict((nodes_dict[key], pagerank_dict[key]) for key in nodes_dict)
+    pagerank_dict = dict((nodes_dict[key], pagerank_dict[key]) for key in nodes_dict if key in pagerank_dict)
     pagerank_list = dict_to_sorted_list(pagerank_dict)
 
     with open(path, 'w') as out:
@@ -146,20 +164,19 @@ def output_pagerank_info (graph, path, nodes_dict):
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
 
-# for debugging
 def output_clustering_info (graph, path, nodes_dict):
     """Output Clustering coefficients information about the graph.
        graph : (networkx.Graph)
        path: (String) contains the path to the output file
        nodes_dict: (dictionary) maps node id to node name
     """
-    cluster_dict = nx.clustering(graph, weight='weight')
-    cluster_dict = dict((nodes_dict[key], cluster_dict[key]) for key in nodes_dict)
+    cluster_dict = nx.clustering(graph)
+    cluster_dict = dict((nodes_dict[key], cluster_dict[key]) for key in nodes_dict if key in cluster_dict)
     cluster_list = dict_to_sorted_list(cluster_dict)
 
     with open(path, 'w') as out:
         out.write('***Clustering***\n')
-        out.write('Average clustering coefficient: %f\n' % nx.average_clustering(graph, weight='weight'))
+        out.write('Average clustering coefficient: %f\n' % nx.average_clustering(graph))
         out.write('Node\tLayer\tClustering coefficient\n')
         for element in cluster_list:
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
