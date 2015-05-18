@@ -62,10 +62,22 @@ def build_graph_networkx (nodes_file, edges_file, graph_name = 'Graph', weighted
     edges_data = read_edges (edges_file)
     graph.add_nodes_from(nodes_data.values())
     for edge in edges_data:
+        """
+        if edge[0][1] == 3 and edge[1][1] == 3:
+            if weighted:
+                graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]], {'weight': edge[2]})
+            else:
+                graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]])
+        """
         if weighted:
             graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]], {'weight': edge[2]})
         else:
             graph.add_edge(nodes_data[edge[0]], nodes_data[edge[1]])
 
+
     inv_nodes = {v: k for k, v in nodes_data.items()}
     return graph, inv_nodes
+
+
+
+

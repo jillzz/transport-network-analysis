@@ -147,22 +147,32 @@ def output_eigenvector_centrality_info (graph, path, nodes_dict):
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
 
-def output_pagerank_info (graph, path, nodes_dict):
+def output_pagerank_info (graph, path, nodes_dict, damping = 1):
     """Output Pagerank information about the graph (no damping factor).
        graph : (networkx.Graph)
        path: (String) contains the path to the output file
        nodes_dict: (dictionary) maps node id to node name
     """
-    pagerank_dict = nx.pagerank(graph, alpha = 1, max_iter=150, weight='weight')
-    pagerank_dict = dict((nodes_dict[key], pagerank_dict[key]) for key in nodes_dict if key in pagerank_dict)
+    pagerank_dict = nx.pagerank(graph, alpha = damping, max_iter=150, weight='weight')
+    #pagerank_dict = dict((nodes_dict[key], pagerank_dict[key]) for key in nodes_dict if key in pagerank_dict)
     pagerank_list = dict_to_sorted_list(pagerank_dict)
 
+
+    count = 1
+    with open(path, 'w') as out:
+        for element in pagerank_list:
+            if count > 7000: break
+            out.write('%d\t%f\n' % (element[0], element[1]))
+            count += 1
+
+    """
     with open(path, 'w') as out:
         out.write('***Pagerank***\n')
         out.write('Node\tLayer\tPagerank\n')
         for element in pagerank_list:
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
+    """
 
 def output_clustering_info (graph, path, nodes_dict):
     """Output Clustering coefficients information about the graph.
@@ -181,3 +191,26 @@ def output_clustering_info (graph, path, nodes_dict):
         for element in cluster_list:
             out.write('%d\t%d\t%f\n' % (element[0][0], element[0][1], element[1]))
 
+
+def output_shortest_path_info (graph, path, nodes_dict, weighted = True):
+    """Output Shortest path information about the graph.
+       graph : (networkx.Graph)
+       path: (String) contains the path to the output file
+       nodes_dict: (dictionary) maps node id to node name
+    """
+
+
+    with open(path, 'w') as out:
+        out.write('***Shortest paths***\n')
+        out.write('From_Node\tFrom_Layer\tTo_Node\tTo_Layer\tShortest_Path\n')
+        for from_node in graph.nodes():
+            if weighted:
+                shortest = nx.single_source_dijkstra_path_length(graph, from_node, weight = 'weight')
+            else:
+                shortest = nx.shortest_path_length(graph)
+            for to_node in shortest:
+                out.write('%d\t%d\t%d\t%d\t%d\n' % (nodes_dict[from_node][0], \
+                                                    nodes_dict[from_node][1], \
+                                                    nodes_dict[to_node][0],   \
+                                                    nodes_dict[to_node][1],   \
+                                                    shortest[to_node]))
