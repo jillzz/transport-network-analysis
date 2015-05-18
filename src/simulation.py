@@ -21,8 +21,10 @@ def read_in_shortest_paths(path):
             shortest_paths_memo[(int(tokens[0]), int(tokens[1]))] = int(tokens[2])
 
 
+#------------------------------------------------------------------------------
+
 def simulate_random_walk (G, damping, max_jumps):
-    """ Random walk simulation on graph G with damping factor d
+    """ Random walk simulation on weighted graph G with damping factor d
         and max_jumps as maximum number of jumps"""
 
     #transition_dict = nx.get_edge_attributes(G, 'transition')
@@ -61,6 +63,44 @@ def simulate_random_walk (G, damping, max_jumps):
     return results, current_node
 
 
+#-------------------------------------------------------------------------------
+
+def simulate_random_walk_unweighted (G, damping, max_jumps):
+    """ Random walk simulation on unweighted graph G with damping factor d
+        and max_jumps as maximum number of jumps"""
+
+    results = []
+    current_node = random.randrange(G.order())
+    while not G.has_node(current_node):
+        current_node = random.randrange(G.order())
+
+    j = 0
+    while (j < max_jumps):
+        previous_node = current_node
+        jump_decision = random.uniform(0, 1)
+
+        if jump_decision < damping or G.out_degree(current_node) == 0:
+            # make a jump
+            current_node = random.randrange(G.order())
+            while not G.has_node(current_node):
+                current_node = random.randrange(G.order())
+
+            j += 1
+            try:
+                distance = nx.shortest_path_length(G, previous_node, current_node)
+                results.append(distance)
+            except nx.NetworkXNoPath: continue
+
+        else:
+            # move to neighbor node
+            incident = G.out_edges([current_node], data = False)
+            current_node = random.choice(incident)[1]
+
+    return results, current_node
+
+
+#------------------------------------------------------------------------------
+
 def main():
     G, nodes_dict = build_graph_networkx('../data/nodes.csv', \
                                          '../data/edges.csv', \
@@ -70,6 +110,7 @@ def main():
     remove_isolated_nodes(G)
     set_transition_probabilities(G)
 
+    """
     start = time.time()
     data, current_node = simulate_random_walk(G, 0.15, 24000)
     end = time.time()
@@ -80,13 +121,19 @@ def main():
             out.write('%d,' % i)
         out.write('\n')
         out.write('%d' % current_node)
+    """
+
+    start = time.time()
+    data, current_node = simulate_random_walk_unweighted(G, 0.15, 1000000)
+    end = time.time()
+    print 'Simulation finished in %d min.' % (float(end-start) / 60.0)
 
     data = np.asarray(data)
     sns.set_palette("deep", desat=.6)
     sns.set_context(rc={"figure.figsize": (8, 4)})
-    plt.hist(data, 50)
+    plt.hist(data, 100)
     plt.show()
-    sns.kdeplot(data, bw = 0.2, shade = True)
+    sns.kdeplot(data, bw = 0.15, shade = True)
     plt.show()
     sns.distplot(data);
     plt.show()
