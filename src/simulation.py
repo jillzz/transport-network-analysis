@@ -14,6 +14,8 @@ from graph_preprocessing import *
 
 shortest_paths_memo = {}
 
+N = 267031            # number of nodes
+
 def read_in_shortest_paths(path):
     with open(path) as in_file:
         for line in in_file:
@@ -27,11 +29,11 @@ def simulate_random_walk (G, damping, max_jumps):
     """ Random walk simulation on weighted graph G with damping factor d
         and max_jumps as maximum number of jumps"""
 
-    #transition_dict = nx.get_edge_attributes(G, 'transition')
     results = []
-    current_node = 24689 #random.randrange(G.order())
+    nodes = [] # keep nodes
+    current_node = random.randrange(N)
     while not G.has_node(current_node):
-        current_node = random.randrange(G.order())
+        current_node = random.randrange(N)
 
     j = 0
     while (j < max_jumps):
@@ -40,9 +42,9 @@ def simulate_random_walk (G, damping, max_jumps):
 
         if jump_decision < damping or G.out_degree(current_node) == 0:
             # make a jump
-            current_node = random.randrange(G.order())
+            current_node = random.randrange(N)
             while not G.has_node(current_node):
-                current_node = random.randrange(G.order())
+                current_node = random.randrange(N)
 
             j += 1
             try:
@@ -50,6 +52,7 @@ def simulate_random_walk (G, damping, max_jumps):
                                current_node, weight = 'weight')
                 # distance intervals 1h traveling
                 results.append(distance)
+                nodes.append(previous_node)
             except nx.NetworkXNoPath: continue
 
         else:
@@ -60,7 +63,7 @@ def simulate_random_walk (G, damping, max_jumps):
             generator = stats.rv_discrete(values = (xk, distribution))
             current_node = incident[generator.rvs()][1]
 
-    return results, current_node
+    return results, nodes
 
 
 #-------------------------------------------------------------------------------
@@ -70,9 +73,11 @@ def simulate_random_walk_unweighted (G, damping, max_jumps):
         and max_jumps as maximum number of jumps"""
 
     results = []
-    current_node = random.randrange(G.order())
+    nodes = [] # keep nodes
+    current_node = random.randrange(N)
     while not G.has_node(current_node):
-        current_node = random.randrange(G.order())
+        current_node = random.randrange(N)
+
 
     j = 0
     while (j < max_jumps):
@@ -81,14 +86,15 @@ def simulate_random_walk_unweighted (G, damping, max_jumps):
 
         if jump_decision < damping or G.out_degree(current_node) == 0:
             # make a jump
-            current_node = random.randrange(G.order())
+            current_node = random.randrange(N)
             while not G.has_node(current_node):
-                current_node = random.randrange(G.order())
+                current_node = random.randrange(N)
 
             j += 1
             try:
                 distance = nx.shortest_path_length(G, previous_node, current_node)
                 results.append(distance)
+                nodes.append(previous_node) # keep nodes
             except nx.NetworkXNoPath: continue
 
         else:
@@ -96,7 +102,7 @@ def simulate_random_walk_unweighted (G, damping, max_jumps):
             incident = G.out_edges([current_node], data = False)
             current_node = random.choice(incident)[1]
 
-    return results, current_node
+    return results, nodes #, current_node (keep nodes)
 
 
 #------------------------------------------------------------------------------
@@ -110,38 +116,101 @@ def main():
     remove_isolated_nodes(G)
     set_transition_probabilities(G)
 
-    """
+    print 'MAIN'
+
     start = time.time()
-    data, current_node = simulate_random_walk(G, 0.15, 24000)
+    data, nodes = simulate_random_walk(G, 0.15, 24000)
     end = time.time()
     print 'Simulation finished in %d min.' % (float(end-start) / 60.0)
 
-    with open('../gen_data/results.txt', 'a') as out:
+    with open('../gen_data/weighted_jumps.txt', 'w') as out:
         for i in data:
-            out.write('%d,' % i)
-        out.write('\n')
-        out.write('%d' % current_node)
+            out.write('%d\n' % i)
+
+    with open('../gen_data/weighted_jumps_from.txt', 'w') as out:
+        for i in nodes:
+            out.write('%d\n' % i)
+
     """
-
-    start = time.time()
-    data, current_node = simulate_random_walk_unweighted(G, 0.15, 1000000)
-    end = time.time()
-    print 'Simulation finished in %d min.' % (float(end-start) / 60.0)
-
     data = np.asarray(data)
     sns.set_palette("deep", desat=.6)
     sns.set_context(rc={"figure.figsize": (8, 4)})
-    plt.hist(data, 100)
-    plt.show()
-    sns.kdeplot(data, bw = 0.15, shade = True)
-    plt.show()
+
+    sns.kdeplot(data, bw = 0.1, shade = True)
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig2.pdf", dpi=300)
+
     sns.distplot(data);
-    plt.show()
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig3.pdf", dpi=300)
+
+    plt.hist(data, 100)
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig1.pdf", dpi=300)
+
+    sns.boxplot(data);
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig4.pdf", dpi=300)
+    """
+
+#-------------------------------------------------------------------------------
+
+def test():
+    G, nodes_dict = build_graph_networkx('../data/nodes.csv', \
+                                         '../data/edges.csv', \
+                                         graph_name = 'Multilayer Transport Network (Great Britain)', \
+                                         weighted = True)
+    remove_self_loops(G)
+    remove_isolated_nodes(G)
+    #set_transition_probabilities(G)
+
+    jumps = 24000
+    results = []
+    current_node = random.randrange(N)
+    while not G.has_node(current_node):
+        current_node = random.randrange(N)
+
+    for i in xrange(jumps):
+        previous_node = current_node
+        current_node = random.randrange(N)
+        while not G.has_node(current_node):
+            current_node = random.randrange(N)
+
+        try:
+            distance = nx.shortest_path_length(G, previous_node, current_node, weight='weight')
+            results.append(distance)
+        except nx.NetworkXNoPath: continue
 
 
+    with open('../gen_data/only_jumps_weighted1.txt', 'w') as out:
+        for i in results:
+            out.write('%d\n' % i)
 
+    """
+    data = np.asarray(results)
+    sns.set_palette("deep", desat=.6)
+    sns.set_context(rc={"figure.figsize": (8, 4)})
+
+    sns.kdeplot(data, bw = 0.1, shade = True)
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig2J.pdf", dpi=300)
+
+    sns.distplot(data);
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig3J.pdf", dpi=300)
+
+    plt.hist(data, 100)
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig1J.pdf", dpi=300)
+
+    sns.boxplot(data);
+    #plt.show()
+    plt.savefig("../gen_data/figures/fig4J.pdf", dpi=300)
+    """
+
+#-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    main()
+    test()
 
 
